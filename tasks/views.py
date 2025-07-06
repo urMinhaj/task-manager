@@ -7,13 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Task
 from .forms import TaskForm
-from typing import TypedDict
-
-class TaskDict(TypedDict):
-    id: int
-    title: str
-    description: str
-    due_date: str | None
 
 def register_view(request):
     if request.method == 'POST':
@@ -28,15 +21,17 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if not username or not password:
+            return render(request, 'login.html', {'error': 'Username and password are required'})
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             return redirect('task_list')
         else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
-    return render(request, 'login.html')
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
+    return render(request, 'login.html', {'error': None})
 
 @login_required
 def task_list(request):
@@ -66,5 +61,5 @@ def user_info(request):
 @permission_classes([IsAuthenticated])
 def task_list_api(request):
     tasks = Task.objects.filter(user=request.user)
-    data = [TaskDict(id=task.id, title=task.title, description=task.description, due_date=task.due_date) for task in tasks]
+    data = [{'id': task.id, 'title': task.title, 'description': task.description, 'due_date': task.due_date} for task in tasks]  # type: ignore
     return Response(data)
