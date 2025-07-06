@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Task</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>Create Task</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <button type="submit">Create Task</button>
+    </form>
+    <a href="{% url 'task_list' %}">Back to Task List</a>
+</body>
+</html>
